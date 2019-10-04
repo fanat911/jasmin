@@ -304,7 +304,7 @@ class DLRLookup(object):
             if len(q) != 2 or 'msgid' not in q or 'connector_type' not in q:
                 raise DLRMapNotFound('Got a DLR for an unknown message id: %s (coded:%s)' % (pdu_dlr_id, msgid))
 
-            submit_sm_queue_id = q['msgid']
+            submit_sm_queue_id = str(q['msgid'])
             connector_type = q['connector_type']
 
             # Get dlr and ensure it's sc (source_connector) is same as q['connector_type']

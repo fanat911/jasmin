@@ -4,7 +4,7 @@ Multiple classes extending of txamqp.content.Content
 
 import cPickle as pickle
 import datetime
-import uuid
+import random
 
 from txamqp.content import Content
 
@@ -18,7 +18,7 @@ class InvalidParameterError(Exception):
 
 # msgid generator is a pluggable method, make the lookup to find an existant
 # plugin or use the default one (randomUniqueId)
-randomUniqueId = lambda pdu_type, uid, source_cid, destination_cid: str(uuid.uuid4())
+randomUniqueId = lambda pdu_type, uid, source_cid, destination_cid: str(random.randrange(1, 2147483647))
 for entry_point in iter_entry_points(group='jasmin.content', name='msgid'):
     print("Hooking randomUniqueId() from %s" % entry_point.dist)
     randomUniqueId = entry_point.load()
