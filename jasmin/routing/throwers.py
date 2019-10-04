@@ -582,6 +582,11 @@ class DLRThrower(Thrower):
         source_addr_npi = message.content.properties['headers']['source_addr_npi']
         dest_addr_ton = message.content.properties['headers']['dest_addr_ton']
         dest_addr_npi = message.content.properties['headers']['dest_addr_npi']
+
+        orig_err = None
+        if 'orig_err' in message.content.properties['headers']:
+            orig_err = message.content.properties['headers']['orig_err'].encode('ascii')
+
         self.log.debug('Got one message (msgid:%s) to throw', msgid)
 
         # If any, clear requeuing timer
@@ -610,7 +615,8 @@ class DLRThrower(Thrower):
                                             source_addr_ton=source_addr_ton,
                                             source_addr_npi=source_addr_npi,
                                             dest_addr_ton=dest_addr_ton,
-                                            dest_addr_npi=dest_addr_npi)
+                                            dest_addr_npi=dest_addr_npi,
+                                            orig_err=orig_err)
 
             # Pick a deliverer and sendRequest
             if self.smpps_access == 'direct':
