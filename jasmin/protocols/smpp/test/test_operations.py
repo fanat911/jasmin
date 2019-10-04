@@ -195,6 +195,25 @@ class DeliveryParsingTest(OperationsTest):
         self.assertEquals(isDlr['err'], '000')
         self.assertEquals(isDlr['text'], '')
 
+    def test_is_delivery_goip(self):
+        """Received err:0 to err:000, sub:0 to sub:000 and Text to text"""
+        pdu = DeliverSM(
+            source_addr='12345',
+            destination_addr='45678',
+            short_message='id:68673723 sub:0 dlvrd:173 submit date:1909301545 done date:1909301545 stat:DELIVRD err:0 Text:\x04\x1a',
+        )
+
+        isDlr = self.opFactory.isDeliveryReceipt(pdu)
+        self.assertTrue(isDlr is not None)
+        self.assertEquals(isDlr['id'], '68673723')
+        self.assertEquals(isDlr['sub'], '000')
+        self.assertEquals(isDlr['dlvrd'], '173')
+        self.assertEquals(isDlr['sdate'], '1909301545')
+        self.assertEquals(isDlr['ddate'], '1909301545')
+        self.assertEquals(isDlr['stat'], 'DELIVRD')
+        self.assertEquals(isDlr['err'], '000')
+        self.assertEquals(isDlr['text'], '\x04\x1a')
+
     def test_is_delivery_mmg_deliver_sm_224(self):
         """Related to #224, this is a Sicap's MMG deliver_sm receipt"""
         pdu = DeliverSM(

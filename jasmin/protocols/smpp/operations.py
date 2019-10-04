@@ -115,13 +115,13 @@ class SMPPOperationFactory(object):
         if 'short_message' in pdu.params:
             patterns = [
                 r"id:(?P<id>[\dA-Za-z-_]+)",
-                r"sub:(?P<sub>\d{3})",
+                r"sub:(?P<sub>\d{1,3})",
                 r"dlvrd:(?P<dlvrd>\d{3})",
                 r"submit date:(?P<sdate>\d+)",
                 r"done date:(?P<ddate>\d+)",
                 r"stat:(?P<stat>\w{7})",
-                r"err:(?P<err>\w{3})",
-                r"text:(?P<text>.*)",
+                r"err:(?P<err>\w{1,3})",
+                r"[tT]ext:(?P<text>.*)",
             ]
 
             # Look for patterns and compose return object
@@ -133,6 +133,11 @@ class SMPPOperationFactory(object):
                         or (key == 'id' and 'id' not in ret)
                         or (key == 'stat' and 'stat' not in ret)):
                         ret.update(m.groupdict())
+
+        if ret['sub'] == '0':
+            ret['sub'] = '000'
+        if ret['err'] == '0':
+            ret['err'] = '000'
 
         # Should we consider this as a DLR ?
         if 'id' in ret and 'stat' in ret:
@@ -248,8 +253,8 @@ class SMPPOperationFactory(object):
         return pdu
 
     def getReceipt(self, dlr_pdu, msgid, source_addr, destination_addr, message_status, sub_date,
-                   source_addr_ton, source_addr_npi, dest_addr_ton, dest_addr_npi):
-        "Will build a DataSm or a DeliverSm (depending on dlr_pdu) containing a receipt data"
+                   source_addr_ton, source_addr_npi, dest_addr_ton, dest_addr_npi, orig_err=None):
+        """Will build a DataSm or a DeliverSm (depending on dlr_pdu) containing a receipt data"""
 
         sm_message_stat = message_status
         # Prepare message_state
@@ -270,6 +275,8 @@ class SMPPOperationFactory(object):
             err = 8
         elif message_status == 'DELIVRD':
             err = 2
+            if orig_err is not None:
+                err = orig_err
             message_state = MessageState.DELIVERED
         elif message_status == 'EXPIRED':
             err = 3
@@ -291,7 +298,10 @@ class SMPPOperationFactory(object):
 
         # Build pdu
         if dlr_pdu == 'deliver_sm':
-            short_message = r"id:%s submit date:%s done date:%s stat:%s err:%03d" % (
+            if isinstance(err, int):
+                err = r"%03d" % err
+
+            short_message = r"id:%s submit date:%s done date:%s stat:%s err:%s" % (
                 msgid,
                 parser.parse(sub_date).strftime("%y%m%d%H%M"),
                 datetime.datetime.now().strftime("%y%m%d%H%M"),

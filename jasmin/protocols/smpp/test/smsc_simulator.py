@@ -12,7 +12,6 @@ message_state_map = {
     'DELIVRD': MessageState.DELIVERED,
     'EXPIRED': MessageState.EXPIRED,
     'DELETED': MessageState.DELETED,
-    'ACCEPTD': MessageState.ACCEPTED,
     'UNKNOWN': MessageState.UNKNOWN,
 }
 
